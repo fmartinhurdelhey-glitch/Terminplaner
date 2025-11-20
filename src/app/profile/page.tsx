@@ -1,0 +1,231 @@
+'use client'
+
+import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Loader2, LogOut } from 'lucide-react'
+import Link from 'next/link'
+import { HeroHeader } from '@/components/header'
+import FooterSection from '@/components/footer'
+
+export default function ProfilePage() {
+  const { user, loading, initialized, signOut } = useAuth()
+  const router = useRouter()
+  const [isClient, setIsClient] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+  
+  // Abonnementstatus überprüfen
+  const isProUser = user?.subscription?.status === 'active' && user?.subscription?.plan?.toLowerCase() === 'pro'
+  const isFreeUser = !isProUser
+  
+  // Formatierung des Ablaufdatums (falls vorhanden)
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A'
+    return new Date(dateString).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  useEffect(() => {
+    console.log('Profile page mounted', { user, loading, initialized });
+    setIsClient(true);
+  }, []);
+
+  // Show loading state while checking auth
+  if (!isClient || !initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <p className="text-gray-600">Laden...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If no user, show unauthorized message
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Nicht autorisiert</p>
+          <button
+            onClick={() => router.push('/login')}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            Zum Login
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const handleBack = () => {
+    router.back()
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.push('/')
+    } catch (error) {
+      console.error('Fehler beim Abmelden:', error)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <HeroHeader />
+      <main className="flex-grow pt-20 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 pt-4">Mein Profil</h1>
+        <div className="px-4 py-6 sm:px-0">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            {/* Profilkopf */}
+            <div className="px-6 py-5 border-b border-gray-200 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                <div className="flex-shrink-0">
+                  <div className="h-24 w-24 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-3xl font-bold">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div className="text-center sm:text-left">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {user.firstName} {user.lastName}
+                  </h2>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <div className="mt-2 flex items-center space-x-2">
+                    <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium ${
+                      isProUser 
+                        ? 'bg-indigo-100 text-indigo-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {isProUser ? 'Pro' : 'Kostenlos'}
+                    </span>
+                    {isProUser && user.subscription?.expiresAt && (
+                      <span className="text-sm text-gray-500">
+                        Läuft ab: {formatDate(user.subscription.expiresAt)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  
+                  <div className="mt-4">
+                    {isProUser ? (
+                      <div className="space-y-4">
+                        <div className="p-4 bg-indigo-50 rounded-lg">
+                          <h3 className="text-lg font-medium text-indigo-800">Ihr Pro-Abonnement</h3>
+                          <p className="mt-1 text-sm text-indigo-700">
+                            Vielen Dank, dass Sie Pro-Mitglied sind! Sie genießen alle Vorteile.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (window.confirm('Möchten Sie Ihr Pro-Abonnement wirklich kündigen?')) {
+                              setIsCancelling(true)
+                              // TODO: Implement actual cancellation logic here
+                            console.log('Subscription cancellation requested')
+                            // Simulate API call
+                            setTimeout(() => {
+                              setIsCancelling(false)
+                              alert('Ihr Abonnement wurde gekündigt. Es läuft bis zum Ende der aktuellen Abrechnungsperiode.')
+                            }, 1000)
+                          }
+                        }}
+                        disabled={isCancelling}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isCancelling ? (
+                          <>
+                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                            Wird bearbeitet...
+                          </>
+                        ) : (
+                          'Abonnement kündigen'
+                        )}
+                      </button>
+                      </div>
+                    ) : (
+                      <Link
+                        href="/pricing"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Upgrade auf Pro
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Kontoinformationen */}
+            <div className="px-6 py-5">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Kontoinformationen</h3>
+              <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Vollständiger Name</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {user.firstName} {user.lastName}
+                  </dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">E-Mail-Adresse</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{user.email}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Mitglied seit</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString('de-DE', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    }) : 'Nicht verfügbar'}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* Abonnement-Status */}
+            <div className="border-t border-gray-200 px-6 py-5">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Abonnement</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Aktueller Plan</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {user.subscription?.plan || 'Kein aktives Abonnement'}
+                    </p>
+                  </div>
+                  {user.subscription?.status && (
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      user.subscription.status === 'active' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {user.subscription.status === 'active' ? 'Aktiv' : 'Inaktiv'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Abmelde-Button */}
+            <div className="bg-gray-50 px-6 py-4 text-right sm:px-6">
+              <button
+                onClick={handleSignOut}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              >
+                <LogOut className="-ml-1 mr-2 h-5 w-5" />
+                Abmelden
+              </button>
+            </div>
+          </div>
+        </div>
+        </div>
+        <FooterSection />
+      </main>
+      </div>
+  )
+}
