@@ -8,7 +8,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ClientOnly>
       <AuthProvider>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           {children}
         </ThemeProvider>
       </AuthProvider>
