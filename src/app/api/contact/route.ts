@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-// Configure the email transport
+// Configure the email transport for Strato
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or your email service
+  host: 'smtp.strato.de',
+  port: 465,
+  secure: true, // use SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
