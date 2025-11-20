@@ -12,7 +12,7 @@ export default function FeaturesSection() {
                 <div className="px-0 relative">
                     <div className="relative rounded-xl overflow-hidden">
                         <Image
-                            src="/verbinden.jpg"
+                            src="/Verbinden.jpg"
                             alt="Terminplaner Dashboard"
                             width={1600}
                             height={1067}
