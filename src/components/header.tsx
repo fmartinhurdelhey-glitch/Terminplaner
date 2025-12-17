@@ -98,68 +98,35 @@ export const HeroHeader = () => {
                             <div className="flex w-full items-center justify-end gap-4">
                                 {user ? (
                                     <div className="flex items-center gap-3">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" size="sm">
-                                                    <Download className="mr-2 h-4 w-4" />
+                                        <div className="relative inline-block">
+                                            <select
+                                                onChange={(e) => {
+                                                    if (e.target.value) {
+                                                        window.location.href = e.target.value;
+                                                        e.target.value = '';
+                                                    }
+                                                }}
+                                                className="appearance-none bg-background border border-input hover:bg-accent hover:text-accent-foreground h-9 px-4 pr-8 rounded-md text-sm font-medium cursor-pointer flex items-center gap-2"
+                                                defaultValue=""
+                                            >
+                                                <option value="" disabled>
                                                     Download
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-56 z-[100]">
-                                                <DropdownMenuItem asChild>
-                                                    <a 
-                                                        href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0-arm64.dmg"
-                                                        download
-                                                        className="flex items-center cursor-pointer"
-                                                    >
-                                                        <Apple className="mr-2 h-4 w-4" />
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium">macOS (M1/M2/M3)</span>
-                                                            <span className="text-xs text-muted-foreground">113 MB</span>
-                                                        </div>
-                                                    </a>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <a 
-                                                        href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.dmg"
-                                                        download
-                                                        className="flex items-center cursor-pointer"
-                                                    >
-                                                        <Apple className="mr-2 h-4 w-4" />
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium">macOS (Intel)</span>
-                                                            <span className="text-xs text-muted-foreground">118 MB</span>
-                                                        </div>
-                                                    </a>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <a 
-                                                        href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner.Setup.1.0.0.exe"
-                                                        download
-                                                        className="flex items-center cursor-pointer"
-                                                    >
-                                                        <Monitor className="mr-2 h-4 w-4" />
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium">Windows</span>
-                                                            <span className="text-xs text-muted-foreground">178 MB</span>
-                                                        </div>
-                                                    </a>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <a 
-                                                        href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.AppImage"
-                                                        download
-                                                        className="flex items-center cursor-pointer"
-                                                    >
-                                                        <Laptop className="mr-2 h-4 w-4" />
-                                                        <div className="flex flex-col">
-                                                            <span className="font-medium">Linux</span>
-                                                            <span className="text-xs text-muted-foreground">118 MB</span>
-                                                        </div>
-                                                    </a>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                                </option>
+                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0-arm64.dmg">
+                                                    🍎 macOS (M1/M2/M3) - 113 MB
+                                                </option>
+                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.dmg">
+                                                    🍎 macOS (Intel) - 118 MB
+                                                </option>
+                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner.Setup.1.0.0.exe">
+                                                    🪟 Windows - 178 MB
+                                                </option>
+                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.AppImage">
+                                                    🐧 Linux - 118 MB
+                                                </option>
+                                            </select>
+                                            <Download className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-muted-foreground" />
+                                        </div>
                                         <Button asChild variant="ghost" size="icon" className="rounded-full">
                                             <Link href="/profile">
                                                 <User className="h-5 w-5" />
