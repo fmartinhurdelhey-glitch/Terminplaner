@@ -105,7 +105,7 @@ export const HeroHeader = () => {
                                                     Download
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-56">
+                                            <DropdownMenuContent align="end" className="w-56 z-[100]">
                                                 <DropdownMenuItem asChild>
                                                     <a 
                                                         href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0-arm64.dmg"
