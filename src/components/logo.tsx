@@ -25,7 +25,7 @@ export const Logo = ({ className, uniColor }: { className?: string; uniColor?: b
                     </linearGradient>
                 </defs>
             </svg>
-            <span className="text-foreground text-lg font-semibold">Keiro</span>
+            <span className="text-foreground text-lg font-semibold">Mailkalender</span>
         </div>
     )
 }

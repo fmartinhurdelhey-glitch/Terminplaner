@@ -49,7 +49,7 @@ export default function HeroSection() {
                                 delay={0.5}
                                 as="p"
                                 className="mx-auto mt-6 max-w-2xl text-pretty text-lg">
-                                Keiro verwandelt Termin-E-Mails in Kalendereinträge – vollautomatisch, sicher und zuverlässig. Weniger Aufwand, mehr Fokus auf das Wesentliche.
+                                Mailkalender verwandelt Termin-E-Mails in Kalendereinträge – vollautomatisch, sicher und zuverlässig. Weniger Aufwand, mehr Fokus auf das Wesentliche.
                             </TextEffect>
 
                             <div className="mt-12">

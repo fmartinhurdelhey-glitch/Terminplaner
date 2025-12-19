@@ -8,7 +8,7 @@ export default function Features() {
             <div className="mx-auto max-w-5xl px-6">
                 <div className="text-center">
                     <h2 className="text-balance text-4xl font-semibold lg:text-5xl">Gebaut um deine Termine zu vereinheitlichen</h2>
-                    <p className="mt-4">Keiro ist ein intelligenter Terminplaner, der automatisch Termine aus E-Mails extrahiert und in Kalendern verwalten kann.</p>
+                    <p className="mt-4">Mailkalender ist ein intelligenter Terminplaner, der automatisch Termine aus E-Mails extrahiert und in Kalendern verwalten kann.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto mt-8 max-w-5xl text-center md:mt-16">
                     <Card className="group shadow-zinc-950/5">
@@ -32,7 +32,7 @@ Du entscheidest, ob neue Termine automatisch übernommen oder manuell bestätigt
                             <h3 className="mt-6 font-medium">Anpassbare Oberfläche</h3>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm">Gestalte Keiro so, wie es zu dir passt.
+                            <p className="text-sm">Gestalte Mailkalender so, wie es zu dir passt.
 Farben, Layouts und Funktionen lassen sich individuell an deinen Stil oder dein Unternehmen anpassen.</p>
                         </CardContent>
                     </Card>

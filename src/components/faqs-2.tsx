@@ -7,8 +7,8 @@ export default function FAQsTwo() {
     const faqItems = [
         {
             id: 'item-1',
-            question: 'Wie funktioniert Keiro genau?',
-            answer: 'Keiro analysiert automatisch eingehende E-Mails, erkennt darin Termine, Meetings oder Events und schlägt dir vor, sie direkt in deinen Kalender einzutragen – mit nur einem Klick zur Bestätigung.',
+            question: 'Wie funktioniert Mailkalender genau?',
+            answer: 'Mailkalender analysiert automatisch eingehende E-Mails, erkennt darin Termine, Meetings oder Events und schlägt dir vor, sie direkt in deinen Kalender einzutragen – mit nur einem Klick zur Bestätigung.',
         },
         {
             id: 'item-2',
@@ -17,13 +17,13 @@ export default function FAQsTwo() {
         },
         {
             id: 'item-3',
-            question: 'Liest Keiro wirklich alle meine E-Mails?',
+            question: 'Liest Mailkalender wirklich alle meine E-Mails?',
             answer: 'Nein. Die KI scannt nur die Metadaten und Inhalte relevanter Nachrichten, um Termine oder Zeitangaben zu erkennen. Private Nachrichten werden nicht gespeichert oder weitergegeben.',
         },
         {
             id: 'item-4',
-            question: 'Mit welchen Kalendern funktioniert Keiro?',
-            answer: "Keiro lässt sich mit gängigen Kalendern wie Google Calendar, Outlook und Apple Calendar verbinden – weitere Integrationen sind in Planung. Zudem gibt es einen App internen Kalender.",
+            question: 'Mit welchen Kalendern funktioniert Mailkalender?',
+            answer: "Mailkalender lässt sich mit gängigen Kalendern wie Google Calendar, Outlook und Apple Calendar verbinden – weitere Integrationen sind in Planung. Zudem gibt es einen App internen Kalender.",
         },
         {
             id: 'item-5',

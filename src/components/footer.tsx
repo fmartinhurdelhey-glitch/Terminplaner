@@ -57,7 +57,7 @@ export default function FooterSection() {
                         </Link>
                     ))}
                 </div>
-                <span className="text-muted-foreground block text-center text-sm"> © {new Date().getFullYear()} Keiro, All rights reserved</span>
+                <span className="text-muted-foreground block text-center text-sm"> © {new Date().getFullYear()} Mailkalender, All rights reserved</span>
             </div>
         </footer>
     )
