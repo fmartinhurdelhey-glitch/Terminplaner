@@ -98,35 +98,48 @@ export const HeroHeader = () => {
                             <div className="flex w-full items-center justify-end gap-4">
                                 {user ? (
                                     <div className="flex items-center gap-3">
-                                        <div className="relative inline-block">
-                                            <select
-                                                onChange={(e) => {
-                                                    if (e.target.value) {
-                                                        window.location.href = e.target.value;
-                                                        e.target.value = '';
-                                                    }
-                                                }}
-                                                className="appearance-none bg-background border border-input hover:bg-accent hover:text-accent-foreground h-9 px-4 pr-8 rounded-md text-sm font-medium cursor-pointer flex items-center gap-2"
-                                                defaultValue=""
-                                            >
-                                                <option value="" disabled>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="sm" className="gap-2">
+                                                    <Download className="h-4 w-4" />
                                                     Download
-                                                </option>
-                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0-arm64.dmg">
-                                                    🍎 macOS (M1/M2/M3) - 113 MB
-                                                </option>
-                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.dmg">
-                                                    🍎 macOS (Intel) - 118 MB
-                                                </option>
-                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner.Setup.1.0.0.exe">
-                                                    🪟 Windows - 178 MB
-                                                </option>
-                                                <option value="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.AppImage">
-                                                    🐧 Linux - 118 MB
-                                                </option>
-                                            </select>
-                                            <Download className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-muted-foreground" />
-                                        </div>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-[280px]">
+                                                <DropdownMenuItem asChild>
+                                                    <a href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0-arm64.dmg" className="flex items-center gap-3 cursor-pointer">
+                                                        <Apple className="h-4 w-4" />
+                                                        <span>macOS (M1/M2/M3) - 113 MB</span>
+                                                    </a>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <a href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.dmg" className="flex items-center gap-3 cursor-pointer">
+                                                        <Apple className="h-4 w-4" />
+                                                        <span>macOS (Intel) - 118 MB</span>
+                                                    </a>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <a href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner.Setup.1.0.0.exe" className="flex items-center gap-3 cursor-pointer">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                            <line x1="3" y1="12" x2="21" y2="12" />
+                                                            <line x1="12" y1="3" x2="12" y2="21" />
+                                                        </svg>
+                                                        <span>Windows - 178 MB</span>
+                                                    </a>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <a href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0.AppImage" className="flex items-center gap-3 cursor-pointer">
+                                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
+                                                            <path d="M12 7v10" />
+                                                            <path d="M8 12h8" />
+                                                        </svg>
+                                                        <span>Linux - 118 MB</span>
+                                                    </a>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                         <Button asChild variant="ghost" size="icon" className="rounded-full">
                                             <Link href="/profile">
                                                 <User className="h-5 w-5" />
