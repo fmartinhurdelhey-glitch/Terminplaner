@@ -115,7 +115,7 @@ export const HeroHeader = () => {
                                                         className="fixed inset-0 z-30" 
                                                         onClick={() => setDownloadOpen(false)}
                                                     />
-                                                    <div className="absolute right-0 top-full mt-2 w-[280px] bg-popover text-popover-foreground rounded-md border shadow-md p-1 z-40">
+                                                    <div className="absolute right-0 top-full mt-2 w-[280px] bg-white dark:bg-gray-900 rounded-md border shadow-md p-1 z-40">
                                                         <a 
                                                             href="https://github.com/fmartinhurdelhey-glitch/Terminplaner/releases/download/v1.0.0/Email.Terminplaner-1.0.0-arm64.dmg"
                                                             className="flex items-center gap-3 px-2 py-2 rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors"
