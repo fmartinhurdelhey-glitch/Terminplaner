@@ -5,7 +5,7 @@ export default function ImpressumPage() {
   return (
     <>
       <HeroHeader />
-      <main className="min-h-screen py-16">
+      <main className="min-h-screen pt-48 pb-16">
         <div className="container mx-auto max-w-4xl px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-12">Impressum</h1>
           
