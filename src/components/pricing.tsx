@@ -187,16 +187,16 @@ export default function Pricing() {
                 <div className="mt-8 grid gap-6 md:mt-20 md:grid-cols-3">
                     <Card className="flex flex-col border border-border shadow-sm">
                         <CardHeader>
-                            <CardTitle className="font-medium">Kostenlos</CardTitle>
-                            <span className="my-3 block text-2xl font-semibold">0€ / mo</span>
-                            <CardDescription className="text-sm">Pro Nutzer</CardDescription>
+                            <CardTitle className="font-medium">Einmalig bezahlen</CardTitle>
+                            <span className="my-3 block text-2xl font-semibold">250€</span>
+                            <CardDescription className="text-sm">Einmalige Zahlung</CardDescription>
                         </CardHeader>
 
                         <CardContent className="space-y-4">
                             <hr className="border-dashed" />
 
                             <ul className="list-outside space-y-3 text-sm">
-                                {['15 Termine pro Monat', '5GB Cloud Speicher', 'Email Support', 'Standard Sicherheit Features'].map((item, index) => (
+                                {['Lebenslanger Zugriff', 'Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Standard Sicherheit Features'].map((item, index) => (
                                     <li
                                         key={index}
                                         className="flex items-center gap-2">
@@ -209,10 +209,11 @@ export default function Pricing() {
 
                         <CardFooter className="mt-auto">
                             <Button
-                                asChild
+                                onClick={() => handleCheckout('price_EINMALZAHLUNG_PRICE_ID')}
+                                disabled={loading}
                                 variant="outline"
                                 className="w-full">
-                                <Link href="/signup">Starten</Link>
+                                {loading ? 'Lädt...' : 'Starten'}
                             </Button>
                         </CardFooter>
                     </Card>
