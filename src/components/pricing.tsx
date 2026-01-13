@@ -26,8 +26,7 @@ function ContactForm({ onClose }: { onClose: () => void }) {
     setIsSubmitting(true);
     
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const response = await fetch(`${baseUrl}/api/contact`, {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
