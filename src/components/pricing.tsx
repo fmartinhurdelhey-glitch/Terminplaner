@@ -7,6 +7,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import { loadStripe } from '@stripe/stripe-js';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 function ContactForm({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState('');
@@ -126,6 +131,41 @@ function ContactForm({ onClose }: { onClose: () => void }) {
 
 export default function Pricing() {
   const [showContactForm, setShowContactForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
+  const handleCheckout = async (priceId: string) => {
+    if (!user) {
+      toast.error('Bitte melde dich an, um fortzufahren');
+      setTimeout(() => {
+        window.location.href = '/signup';
+      }, 1500);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Checkout fehlgeschlagen');
+      }
+
+      const { sessionId } = await response.json();
+      
+      window.location.href = sessionId;
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Fehler beim Öffnen der Checkout-Seite');
+    } finally {
+      setLoading(false);
+    }
+  };
     return (
         <section className="py-16 md:py-32">
             <div className="mx-auto max-w-6xl px-6">
@@ -161,7 +201,7 @@ export default function Pricing() {
                                 asChild
                                 variant="outline"
                                 className="w-full">
-                                <Link href="">Starten</Link>
+                                <Link href="/signup">Starten</Link>
                             </Button>
                         </CardFooter>
                     </Card>
@@ -191,9 +231,10 @@ export default function Pricing() {
 
                         <CardFooter className="mt-auto">
                             <Button
-                                asChild
+                                onClick={() => handleCheckout('price_REPLACE_WITH_YOUR_STRIPE_PRICE_ID')}
+                                disabled={loading}
                                 className="w-full bg-black text-white hover:bg-gray-800">
-                                <Link href="">Starten</Link>
+                                {loading ? 'Lädt...' : 'Starten'}
                             </Button>
                         </CardFooter>
                     </Card>
