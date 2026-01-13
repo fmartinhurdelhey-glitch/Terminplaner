@@ -1,19 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
   try {
     const { priceId } = await req.json();
 
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('sb-access-token')?.value || 
+                       cookieStore.get('supabase-auth-token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Nicht authentifiziert - kein Token gefunden' },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      }
+    );
     
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user || userError) {
+      console.error('User fetch error:', userError);
       return NextResponse.json(
         { error: 'Nicht authentifiziert' },
         { status: 401 }
