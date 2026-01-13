@@ -166,38 +166,36 @@ export default function Pricing() {
                         </CardFooter>
                     </Card>
 
-                    <Card className="relative border-2 border-primary shadow-lg">
+                    <Card className="relative flex flex-col border-2 border-primary shadow-lg">
                         <span className="absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full bg-gradient-to-br from-purple-400 to-amber-300 px-3 py-1 text-xs font-medium text-amber-950 shadow-md">Popular</span>
 
-                        <div className="flex flex-col">
-                            <CardHeader>
-                                <CardTitle className="font-medium">Pro</CardTitle>
-                                <span className="my-3 block text-2xl font-semibold">15€ / mo</span>
-                                <CardDescription className="text-sm">Pro Nutzer</CardDescription>
-                            </CardHeader>
+                        <CardHeader>
+                            <CardTitle className="font-medium">Pro</CardTitle>
+                            <span className="my-3 block text-2xl font-semibold">15€ / mo</span>
+                            <CardDescription className="text-sm">Pro Nutzer</CardDescription>
+                        </CardHeader>
 
-                            <CardContent className="space-y-4">
-                                <hr className="border-dashed" />
-                                <ul className="list-outside space-y-3 text-sm">
-                                    {['Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Monthly Product Updates', 'Standard Sicherheit Features'].map((item, index) => (
-                                        <li
-                                            key={index}
-                                            className="flex items-center gap-2">
-                                            <Check className="size-3" />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
+                        <CardContent className="space-y-4">
+                            <hr className="border-dashed" />
+                            <ul className="list-outside space-y-3 text-sm">
+                                {['Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Monthly Product Updates', 'Standard Sicherheit Features'].map((item, index) => (
+                                    <li
+                                        key={index}
+                                        className="flex items-center gap-2">
+                                        <Check className="size-3" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
 
-                            <CardFooter>
-                                <Button
-                                    asChild
-                                    className="w-full bg-black text-white hover:bg-gray-800">
-                                    <Link href="">Starten</Link>
-                                </Button>
-                            </CardFooter>
-                        </div>
+                        <CardFooter className="mt-auto">
+                            <Button
+                                asChild
+                                className="w-full bg-black text-white hover:bg-gray-800">
+                                <Link href="">Starten</Link>
+                            </Button>
+                        </CardFooter>
                     </Card>
 
                     <Card className="flex flex-col border border-border shadow-sm">
