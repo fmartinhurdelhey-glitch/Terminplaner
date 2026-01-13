@@ -18,6 +18,7 @@ export default function Login({ isSignup = false }: LoginProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { signIn, signUp } = useAuth()
   const router = useRouter()
@@ -36,6 +37,12 @@ export default function Login({ isSignup = false }: LoginProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    
+    if (isSignup && !termsAccepted) {
+      toast.error('Bitte akzeptieren Sie die AGB und Datenschutzerklärung, um sich zu registrieren.')
+      return
+    }
+    
     setIsLoading(true)
 
     try {
@@ -124,6 +131,34 @@ export default function Login({ isSignup = false }: LoginProps) {
                 disabled={isLoading}
               />
             </div>
+            {isSignup && (
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary cursor-pointer"
+                    disabled={isLoading}
+                  />
+                  <label htmlFor="terms" className="text-sm text-muted-foreground cursor-pointer">
+                    Ich habe die{' '}
+                    <Link href="/agbs" target="_blank" className="text-primary hover:underline">
+                      AGB
+                    </Link>
+                    {' '}und die{' '}
+                    <Link href="/datenschutz" target="_blank" className="text-primary hover:underline">
+                      Datenschutzerklärung
+                    </Link>
+                    {' '}gelesen und akzeptiere sie.
+                  </label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Mit der Registrierung erhältst du sofort Zugriff auf Mailkalender.
+                </p>
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Wird geladen...' : isSignup ? 'Konto erstellen' : 'Anmelden'}
             </Button>
