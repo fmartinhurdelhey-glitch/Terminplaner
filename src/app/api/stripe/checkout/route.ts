@@ -7,16 +7,16 @@ export async function POST(req: NextRequest) {
   try {
     const { priceId } = await req.json();
 
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('sb-access-token')?.value || 
-                       cookieStore.get('supabase-auth-token')?.value;
-
-    if (!accessToken) {
+    const authHeader = req.headers.get('authorization');
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { error: 'Nicht authentifiziert - kein Token gefunden' },
         { status: 401 }
       );
     }
+
+    const accessToken = authHeader.replace('Bearer ', '');
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

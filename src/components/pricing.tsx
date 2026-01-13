@@ -10,6 +10,7 @@ import { Textarea } from './ui/textarea';
 import { loadStripe } from '@stripe/stripe-js';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -146,9 +147,19 @@ export default function Pricing() {
     setLoading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        toast.error('Keine gültige Session gefunden');
+        return;
+      }
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ priceId }),
       });
 
@@ -231,7 +242,7 @@ export default function Pricing() {
 
                         <CardFooter className="mt-auto">
                             <Button
-                                onClick={() => handleCheckout('price_REPLACE_WITH_YOUR_STRIPE_PRICE_ID')}
+                                onClick={() => handleCheckout('price_1SpCEHLF1PJBnUS7CPNPranN')}
                                 disabled={loading}
                                 className="w-full bg-black text-white hover:bg-gray-800">
                                 {loading ? 'Lädt...' : 'Starten'}
