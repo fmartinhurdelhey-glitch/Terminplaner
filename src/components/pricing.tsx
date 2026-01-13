@@ -187,6 +187,40 @@ export default function Pricing() {
                 <div className="mt-8 grid gap-6 md:mt-20 md:grid-cols-3">
                     <Card className="flex flex-col border border-border shadow-sm">
                         <CardHeader>
+                            <CardTitle className="font-medium">Pro</CardTitle>
+                            <span className="my-3 block text-2xl font-semibold">15€ / mo</span>
+                            <CardDescription className="text-sm">Pro Nutzer</CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            <hr className="border-dashed" />
+                            <ul className="list-outside space-y-3 text-sm">
+                                {['Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Monthly Product Updates', 'Standard Sicherheit Features'].map((item, index) => (
+                                    <li
+                                        key={index}
+                                        className="flex items-center gap-2">
+                                        <Check className="size-3" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+
+                        <CardFooter className="mt-auto">
+                            <Button
+                                onClick={() => handleCheckout('price_1SpCEHLF1PJBnUS7CPNPranN')}
+                                disabled={loading}
+                                variant="outline"
+                                className="w-full">
+                                {loading ? 'Lädt...' : 'Starten'}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+
+                    <Card className="relative flex flex-col border-2 border-primary shadow-lg">
+                        <span className="absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full bg-gradient-to-br from-purple-400 to-amber-300 px-3 py-1 text-xs font-medium text-amber-950 shadow-md">Popular</span>
+
+                        <CardHeader>
                             <CardTitle className="font-medium">Einmalig bezahlen</CardTitle>
                             <span className="my-3 block text-2xl font-semibold">250€</span>
                             <CardDescription className="text-sm">Einmalige Zahlung</CardDescription>
@@ -210,40 +244,6 @@ export default function Pricing() {
                         <CardFooter className="mt-auto">
                             <Button
                                 onClick={() => handleCheckout('price_1SpH9OLF1PJBnUS7nMwPA4HZ')}
-                                disabled={loading}
-                                variant="outline"
-                                className="w-full">
-                                {loading ? 'Lädt...' : 'Starten'}
-                            </Button>
-                        </CardFooter>
-                    </Card>
-
-                    <Card className="relative flex flex-col border-2 border-primary shadow-lg">
-                        <span className="absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full bg-gradient-to-br from-purple-400 to-amber-300 px-3 py-1 text-xs font-medium text-amber-950 shadow-md">Popular</span>
-
-                        <CardHeader>
-                            <CardTitle className="font-medium">Pro</CardTitle>
-                            <span className="my-3 block text-2xl font-semibold">15€ / mo</span>
-                            <CardDescription className="text-sm">Pro Nutzer</CardDescription>
-                        </CardHeader>
-
-                        <CardContent className="space-y-4">
-                            <hr className="border-dashed" />
-                            <ul className="list-outside space-y-3 text-sm">
-                                {['Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Monthly Product Updates', 'Standard Sicherheit Features'].map((item, index) => (
-                                    <li
-                                        key={index}
-                                        className="flex items-center gap-2">
-                                        <Check className="size-3" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-
-                        <CardFooter className="mt-auto">
-                            <Button
-                                onClick={() => handleCheckout('price_1SpCEHLF1PJBnUS7CPNPranN')}
                                 disabled={loading}
                                 className="w-full bg-black text-white hover:bg-gray-800">
                                 {loading ? 'Lädt...' : 'Starten'}
