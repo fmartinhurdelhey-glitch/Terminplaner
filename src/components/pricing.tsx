@@ -179,7 +179,7 @@ export default function Pricing() {
                             <CardContent className="space-y-4">
                                 <hr className="border-dashed" />
                                 <ul className="list-outside space-y-3 text-sm">
-                                    {['Alles aus dem kostenlosen PLan', 'Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Monthly Product Updates', 'Standard Sicherheit Features'].map((item, index) => (
+                                    {['Unbegrenzte Termine', 'Unbegrenzter Cloud Speicher', 'Email Support', 'Monthly Product Updates', 'Standard Sicherheit Features'].map((item, index) => (
                                         <li
                                             key={index}
                                             className="flex items-center gap-2">
