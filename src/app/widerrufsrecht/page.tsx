@@ -31,8 +31,8 @@ export default function WiderrufsrechtPage() {
                 Um dein Widerrufsrecht auszuüben, musst du uns
               </p>
               <p className="text-muted-foreground leading-relaxed mb-3">
-                <strong>Fabian Martin Hurdelhey, Mailkalender, Brunhildenstraße 13, 45307 Essen, Deutschland,<br />
-                E-Mail: <Link href="mailto:info@mailkalender.de" className="text-primary hover:underline">info@mailkalender.de</Link></strong>
+                Fabian Martin Hurdelhey, Mailkalender, Brunhildenstraße 13, 45307 Essen, Deutschland,<br />
+                E-Mail: <Link href="mailto:info@mailkalender.de" className="text-primary hover:underline">info@mailkalender.de</Link>
               </p>
               <p className="text-muted-foreground leading-relaxed mb-3">
                 mittels einer eindeutigen Erklärung (z. B. per E-Mail) über deinen Entschluss informieren, diesen Vertrag zu widerrufen.
