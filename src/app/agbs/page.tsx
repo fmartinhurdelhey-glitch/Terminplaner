@@ -14,8 +14,8 @@ export default function AGBsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">1. Geltungsbereich</h2>
               <p className="text-muted-foreground leading-relaxed mb-3">
-                Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Webanwendung <strong>Mailkalender</strong>, betrieben von<br />
-                <strong>Fabian Martin Hurdelhey, Mailkalender, Brunhildenstraße 13, 45307 Essen, Deutschland</strong>.
+                Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Webanwendung Mailkalender, betrieben von<br />
+                Fabian Martin Hurdelhey, Mailkalender, Brunhildenstraße 13, 45307 Essen, Deutschland.
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 Abweichende Bedingungen des Nutzers finden keine Anwendung, sofern ihnen nicht ausdrücklich zugestimmt wurde.
