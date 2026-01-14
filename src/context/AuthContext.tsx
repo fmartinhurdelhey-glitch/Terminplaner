@@ -49,41 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initialized, setInitialized] = useState(false)
   const router = useRouter()
 
-  const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promise<User | null> => {
+  // Synchrone User-Mapping Funktion (blockiert nicht das Rendering)
+  const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
     console.log('Mapping Supabase user:', supabaseUser);
     if (!supabaseUser) {
       console.log('No Supabase user provided');
       return null;
-    }
-    
-    // Lade Subscription-Daten aus Supabase
-    let subscriptionData: {
-      plan: string;
-      status: 'active' | 'inactive' | 'cancelled';
-      expiresAt?: string;
-    } = {
-      plan: 'Free',
-      status: 'active',
-    };
-
-    try {
-      const { data: subscription, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', supabaseUser.id)
-        .maybeSingle();
-
-      if (!error && subscription) {
-        subscriptionData = {
-          plan: subscription.plan || 'Free',
-          status: subscription.status || 'active',
-          expiresAt: subscription.current_period_end,
-        };
-      } else if (error) {
-        console.warn('Subscription query error (using Free plan as fallback):', error);
-      }
-    } catch (error) {
-      console.error('Error loading subscription (using Free plan as fallback):', error);
     }
     
     const userData: User = {
@@ -92,11 +63,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       firstName: supabaseUser.user_metadata?.firstName || supabaseUser.user_metadata?.full_name?.split(' ')[0],
       lastName: supabaseUser.user_metadata?.lastName || supabaseUser.user_metadata?.full_name?.split(' ').slice(1).join(' '),
       created_at: supabaseUser.created_at,
-      subscription: subscriptionData
+      subscription: {
+        plan: 'Free',
+        status: 'active',
+      }
     };
     
     console.log('Mapped user data:', userData);
     return userData;
+  }
+
+  // Separate Funktion zum Laden der Subscription-Daten (non-blocking)
+  const loadSubscriptionData = async (userId: string) => {
+    try {
+      const { data: subscription, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!error && subscription) {
+        setUser(prev => prev ? {
+          ...prev,
+          subscription: {
+            plan: subscription.plan || 'Free',
+            status: subscription.status || 'active',
+            expiresAt: subscription.current_period_end,
+          }
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error loading subscription:', error);
+    }
   }
 
   useEffect(() => {
@@ -125,11 +123,16 @@ const getInitialSession = async () => {
       
       if (existingSession) {
         console.log('Found existing session, mapping user...');
-        const mappedUser = await mapSupabaseUser(existingSession.user);
+        const mappedUser = mapSupabaseUser(existingSession.user);
         console.log('Mapped user from session:', mappedUser);
         
         setSession(existingSession);
         setUser(mappedUser);
+        
+        // Lade Subscription-Daten im Hintergrund (non-blocking)
+        if (mappedUser) {
+          loadSubscriptionData(mappedUser.id);
+        }
       } else {
         console.log('No existing session found');
         setSession(null);
@@ -163,10 +166,15 @@ const getInitialSession = async () => {
         });
         
         // Update state based on auth event
-        const mappedUser = await mapSupabaseUser(session?.user || null);
+        const mappedUser = mapSupabaseUser(session?.user || null);
         setSession(session)
         setUser(mappedUser)
         setInitialized(true)
+        
+        // Lade Subscription-Daten im Hintergrund (non-blocking)
+        if (mappedUser) {
+          loadSubscriptionData(mappedUser.id);
+        }
         
         console.log('Auth state updated in context', { 
           event, 
@@ -225,8 +233,13 @@ const getInitialSession = async () => {
         // Ensure the session is properly set
         if (data?.session) {
           setSession(data.session);
-          const mappedUser = await mapSupabaseUser(data.session.user);
+          const mappedUser = mapSupabaseUser(data.session.user);
           setUser(mappedUser);
+          
+          // Lade Subscription-Daten im Hintergrund
+          if (mappedUser) {
+            loadSubscriptionData(mappedUser.id);
+          }
         }
         
         return { 
@@ -274,7 +287,12 @@ const getInitialSession = async () => {
           if (profileError) throw profileError;
         }
 
-        const mappedUser = await mapSupabaseUser(data?.user || null);
+        const mappedUser = mapSupabaseUser(data?.user || null);
+        
+        // Lade Subscription-Daten im Hintergrund
+        if (mappedUser) {
+          loadSubscriptionData(mappedUser.id);
+        }
         
         return { 
           error: null, 
