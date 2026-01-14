@@ -71,17 +71,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('subscriptions')
         .select('*')
         .eq('user_id', supabaseUser.id)
-        .single();
+        .maybeSingle();
 
       if (!error && subscription) {
         subscriptionData = {
           plan: subscription.plan || 'Free',
-          status: subscription.status || 'inactive',
+          status: subscription.status || 'active',
           expiresAt: subscription.current_period_end,
         };
+      } else if (error) {
+        console.warn('Subscription query error (using Free plan as fallback):', error);
       }
     } catch (error) {
-      console.error('Error loading subscription:', error);
+      console.error('Error loading subscription (using Free plan as fallback):', error);
     }
     
     const userData: User = {
