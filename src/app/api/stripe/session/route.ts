@@ -41,10 +41,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hole Session-Daten von Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Hole Session-Daten von Stripe (mit line_items)
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['line_items', 'line_items.data.price']
+    });
+
+    console.log('Stripe session retrieved:', {
+      id: session.id,
+      payment_status: session.payment_status,
+      mode: session.mode,
+      customer: session.customer,
+      subscription: session.subscription,
+      line_items: session.line_items?.data[0]?.price?.id
+    });
 
     if (!session || session.payment_status !== 'paid') {
+      console.error('Payment not completed:', session);
       return NextResponse.json(
         { error: 'Zahlung nicht abgeschlossen' },
         { status: 400 }
@@ -77,28 +89,35 @@ export async function POST(req: NextRequest) {
     );
 
     // Speichere oder aktualisiere Subscription in Supabase
-    const { error: dbError } = await supabaseAdmin
+    const subscriptionData = {
+      user_id: user.id,
+      stripe_customer_id: session.customer as string,
+      stripe_subscription_id: subscriptionId,
+      stripe_price_id: session.line_items?.data[0]?.price?.id,
+      plan: planName,
+      status: 'active',
+      current_period_start: new Date().toISOString(),
+      current_period_end: currentPeriodEnd,
+      cancel_at_period_end: false,
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('Saving subscription data to Supabase:', subscriptionData);
+
+    const { data: savedData, error: dbError } = await supabaseAdmin
       .from('subscriptions')
-      .upsert({
-        user_id: user.id,
-        stripe_customer_id: session.customer as string,
-        stripe_subscription_id: subscriptionId,
-        stripe_price_id: session.line_items?.data[0]?.price?.id,
-        plan: planName,
-        status: 'active',
-        current_period_start: new Date().toISOString(),
-        current_period_end: currentPeriodEnd,
-        cancel_at_period_end: false,
-        updated_at: new Date().toISOString(),
-      });
+      .upsert(subscriptionData)
+      .select();
 
     if (dbError) {
       console.error('Database error:', dbError);
       return NextResponse.json(
-        { error: 'Fehler beim Speichern der Subscription' },
+        { error: 'Fehler beim Speichern der Subscription', details: dbError.message },
         { status: 500 }
       );
     }
+
+    console.log('Subscription saved successfully:', savedData);
 
     return NextResponse.json({ 
       success: true,
