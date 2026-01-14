@@ -57,9 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Lade Subscription-Daten aus Supabase
-    let subscriptionData = {
+    let subscriptionData: {
+      plan: string;
+      status: 'active' | 'inactive' | 'cancelled';
+      expiresAt?: string;
+    } = {
       plan: 'Free',
-      status: 'active' as const,
+      status: 'active',
     };
 
     try {
@@ -219,7 +223,8 @@ const getInitialSession = async () => {
         // Ensure the session is properly set
         if (data?.session) {
           setSession(data.session);
-          setUser(mapSupabaseUser(data.session.user));
+          const mappedUser = await mapSupabaseUser(data.session.user);
+          setUser(mappedUser);
         }
         
         return { 
@@ -267,10 +272,12 @@ const getInitialSession = async () => {
           if (profileError) throw profileError;
         }
 
+        const mappedUser = await mapSupabaseUser(data?.user || null);
+        
         return { 
           error: null, 
           data: {
-            user: mapSupabaseUser(data?.user || null) as User,
+            user: mappedUser as User,
             session: data?.session || null,
             emailConfirmationSent: !!data?.user?.identities?.some(i => i.identity_data?.email === email)
           }

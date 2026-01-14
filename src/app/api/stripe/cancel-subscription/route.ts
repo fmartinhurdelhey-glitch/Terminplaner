@@ -75,10 +75,14 @@ export async function POST(req: NextRequest) {
       })
       .eq('user_id', user.id);
 
+    const cancelAt = (updatedSubscription as any).current_period_end 
+      ? new Date((updatedSubscription as any).current_period_end * 1000).toISOString()
+      : null;
+
     return NextResponse.json({ 
       success: true,
       message: 'Abonnement wird zum Ende der Laufzeit gekündigt',
-      cancel_at: new Date(updatedSubscription.current_period_end * 1000).toISOString(),
+      cancel_at: cancelAt,
     });
   } catch (error) {
     console.error('Cancel subscription error:', error);
