@@ -7,6 +7,7 @@ import { Loader2, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { HeroHeader } from '@/components/header'
 import FooterSection from '@/components/footer'
+import { supabase } from '@/lib/supabase'
 
 export default function ProfilePage() {
   const { user, loading, initialized, signOut } = useAuth()
@@ -122,18 +123,40 @@ export default function ProfilePage() {
                           </p>
                         </div>
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             if (window.confirm('Möchten Sie Ihr Pro-Abonnement wirklich kündigen?')) {
                               setIsCancelling(true)
-                              // TODO: Implement actual cancellation logic here
-                            console.log('Subscription cancellation requested')
-                            // Simulate API call
-                            setTimeout(() => {
-                              setIsCancelling(false)
-                              alert('Ihr Abonnement wurde gekündigt. Es läuft bis zum Ende der aktuellen Abrechnungsperiode.')
-                            }, 1000)
-                          }
-                        }}
+                              try {
+                                const { data: { session } } = await supabase.auth.getSession();
+                                
+                                if (!session?.access_token) {
+                                  alert('Keine gültige Session gefunden');
+                                  return;
+                                }
+
+                                const response = await fetch('/api/stripe/cancel-subscription', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Authorization': `Bearer ${session.access_token}`,
+                                  },
+                                });
+
+                                if (response.ok) {
+                                  const data = await response.json();
+                                  alert(`Ihr Abonnement wurde gekündigt. Es läuft bis zum ${new Date(data.cancel_at).toLocaleDateString('de-DE')}.`);
+                                  window.location.reload();
+                                } else {
+                                  const error = await response.json();
+                                  alert(error.error || 'Fehler beim Kündigen des Abonnements');
+                                }
+                              } catch (error) {
+                                console.error('Cancel error:', error);
+                                alert('Fehler beim Kündigen des Abonnements');
+                              } finally {
+                                setIsCancelling(false);
+                              }
+                            }
+                          }}
                         disabled={isCancelling}
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       >

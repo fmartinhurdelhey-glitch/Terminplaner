@@ -7,18 +7,53 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { HeroHeader } from '@/components/header';
 import FooterSection from '@/components/footer';
+import { supabase } from '@/lib/supabase';
 
 export default function SuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get('session_id');
   const [countdown, setCountdown] = useState(5);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     if (!sessionId) {
       router.push('/pricing');
       return;
     }
+
+    const processCheckout = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.access_token) {
+          console.error('No session found');
+          setIsProcessing(false);
+          return;
+        }
+
+        const response = await fetch('/api/stripe/session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        if (response.ok) {
+          console.log('Subscription data saved successfully');
+        } else {
+          console.error('Failed to save subscription data');
+        }
+      } catch (error) {
+        console.error('Error processing checkout:', error);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    processCheckout();
 
     const timer = setInterval(() => {
       setCountdown((prev) => {

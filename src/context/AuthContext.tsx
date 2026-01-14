@@ -49,11 +49,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initialized, setInitialized] = useState(false)
   const router = useRouter()
 
-  const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
+  const mapSupabaseUser = async (supabaseUser: SupabaseUser | null): Promise<User | null> => {
     console.log('Mapping Supabase user:', supabaseUser);
     if (!supabaseUser) {
       console.log('No Supabase user provided');
       return null;
+    }
+    
+    // Lade Subscription-Daten aus Supabase
+    let subscriptionData = {
+      plan: 'Free',
+      status: 'active' as const,
+    };
+
+    try {
+      const { data: subscription, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      if (!error && subscription) {
+        subscriptionData = {
+          plan: subscription.plan || 'Free',
+          status: subscription.status || 'inactive',
+          expiresAt: subscription.current_period_end,
+        };
+      }
+    } catch (error) {
+      console.error('Error loading subscription:', error);
     }
     
     const userData: User = {
@@ -62,10 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       firstName: supabaseUser.user_metadata?.firstName || supabaseUser.user_metadata?.full_name?.split(' ')[0],
       lastName: supabaseUser.user_metadata?.lastName || supabaseUser.user_metadata?.full_name?.split(' ').slice(1).join(' '),
       created_at: supabaseUser.created_at,
-      subscription: {
-        plan: 'Free', // Default plan
-        status: 'active' as const // Ensure type safety
-      }
+      subscription: subscriptionData
     };
     
     console.log('Mapped user data:', userData);
@@ -98,7 +119,7 @@ const getInitialSession = async () => {
       
       if (existingSession) {
         console.log('Found existing session, mapping user...');
-        const mappedUser = mapSupabaseUser(existingSession.user);
+        const mappedUser = await mapSupabaseUser(existingSession.user);
         console.log('Mapped user from session:', mappedUser);
         
         setSession(existingSession);
@@ -136,8 +157,9 @@ const getInitialSession = async () => {
         });
         
         // Update state based on auth event
+        const mappedUser = await mapSupabaseUser(session?.user || null);
         setSession(session)
-        setUser(mapSupabaseUser(session?.user || null))
+        setUser(mappedUser)
         setInitialized(true)
         
         console.log('Auth state updated in context', { 
