@@ -14,10 +14,16 @@ export default function ProfilePage() {
   const router = useRouter()
   const [isClient, setIsClient] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [showResumeModal, setShowResumeModal] = useState(false)
+  const [isResuming, setIsResuming] = useState(false)
   
   // Abonnementstatus überprüfen
-  const isProUser = user?.subscription?.status === 'active' && user?.subscription?.plan?.toLowerCase() === 'pro'
-  const isFreeUser = !isProUser
+  const isPaidUser = user?.subscription?.status === 'active' && 
+    (user?.subscription?.plan?.toLowerCase() === 'pro' || user?.subscription?.plan?.toLowerCase() === 'lifetime')
+  const isProSubscription = user?.subscription?.plan?.toLowerCase() === 'pro'
+  const isLifetime = user?.subscription?.plan?.toLowerCase() === 'lifetime'
+  const isFreeUser = !isPaidUser
   
   // Formatierung des Ablaufdatums (falls vorhanden)
   const formatDate = (dateString: string) => {
@@ -99,13 +105,13 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-500">{user.email}</p>
                   <div className="mt-2 flex items-center space-x-2">
                     <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium ${
-                      isProUser 
+                      isPaidUser 
                         ? 'bg-indigo-100 text-indigo-800' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {isProUser ? 'Pro' : 'Kostenlos'}
+                      {isLifetime ? 'Lifetime' : isProSubscription ? 'Pro' : 'Kostenlos'}
                     </span>
-                    {isProUser && user.subscription?.expiresAt && (
+                    {isProSubscription && user.subscription?.expiresAt && (
                       <span className="text-sm text-gray-500">
                         Läuft ab: {formatDate(user.subscription.expiresAt)}
                       </span>
@@ -114,61 +120,30 @@ export default function ProfilePage() {
                   
                   
                   <div className="mt-4">
-                    {isProUser ? (
+                    {isPaidUser ? (
                       <div className="space-y-4">
-                        <div className="p-4 bg-indigo-50 rounded-lg">
-                          <h3 className="text-lg font-medium text-indigo-800">Ihr Pro-Abonnement</h3>
-                          <p className="mt-1 text-sm text-indigo-700">
-                            Vielen Dank, dass Sie Pro-Mitglied sind! Sie genießen alle Vorteile.
-                          </p>
-                        </div>
-                        <button
-                          onClick={async () => {
-                            if (window.confirm('Möchten Sie Ihr Pro-Abonnement wirklich kündigen?')) {
-                              setIsCancelling(true)
-                              try {
-                                const { data: { session } } = await supabase.auth.getSession();
-                                
-                                if (!session?.access_token) {
-                                  alert('Keine gültige Session gefunden');
-                                  return;
-                                }
-
-                                const response = await fetch('/api/stripe/cancel-subscription', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Authorization': `Bearer ${session.access_token}`,
-                                  },
-                                });
-
-                                if (response.ok) {
-                                  const data = await response.json();
-                                  alert(`Ihr Abonnement wurde gekündigt. Es läuft bis zum ${new Date(data.cancel_at).toLocaleDateString('de-DE')}.`);
-                                  window.location.reload();
-                                } else {
-                                  const error = await response.json();
-                                  alert(error.error || 'Fehler beim Kündigen des Abonnements');
-                                }
-                              } catch (error) {
-                                console.error('Cancel error:', error);
-                                alert('Fehler beim Kündigen des Abonnements');
-                              } finally {
-                                setIsCancelling(false);
-                              }
-                            }
-                          }}
-                        disabled={isCancelling}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isCancelling ? (
-                          <>
-                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                            Wird bearbeitet...
-                          </>
-                        ) : (
-                          'Abonnement kündigen'
+                        {/* Pro-Subscription Buttons */}
+                        {isProSubscription && (
+                          user.subscription?.cancelAtPeriodEnd ? (
+                            // Abo fortsetzen Button
+                            <button
+                              onClick={() => setShowResumeModal(true)}
+                              disabled={isResuming}
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Abonnement fortsetzen
+                            </button>
+                          ) : (
+                            // Kündigen Button
+                            <button
+                              onClick={() => setShowCancelModal(true)}
+                              disabled={isCancelling}
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Abonnement kündigen
+                            </button>
+                          )
                         )}
-                      </button>
                       </div>
                     ) : (
                       <Link
@@ -249,6 +224,184 @@ export default function ProfilePage() {
         </div>
         <FooterSection />
       </main>
+
+      {/* Fortsetzen-Modal */}
+      {showResumeModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                Abonnement fortsetzen?
+              </h3>
+              <div className="mt-4 space-y-3">
+                <p className="text-sm text-gray-500">
+                  Möchten Sie Ihr Pro-Abonnement wirklich fortsetzen?
+                </p>
+                
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-sm text-green-800">
+                    <strong>Was passiert nach dem Fortsetzen:</strong>
+                  </p>
+                  <ul className="mt-2 text-sm text-green-700 list-disc list-inside space-y-1">
+                    <li>Die Kündigung wird rückgängig gemacht</li>
+                    <li>Ihr Abo verlängert sich automatisch weiter</li>
+                    <li>Sie behalten alle Pro-Features ohne Unterbrechung</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowResumeModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={async () => {
+                  setIsResuming(true)
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (!session?.access_token) {
+                      alert('Keine gültige Session gefunden');
+                      return;
+                    }
+
+                    const response = await fetch('/api/stripe/resume-subscription', {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                      },
+                    });
+
+                    if (response.ok) {
+                      setShowResumeModal(false);
+                      window.location.reload();
+                    } else {
+                      const error = await response.json();
+                      setShowResumeModal(false);
+                      alert(error.error || 'Fehler beim Fortsetzen des Abonnements');
+                    }
+                  } catch (error) {
+                    console.error('Resume error:', error);
+                    alert('Fehler beim Fortsetzen des Abonnements');
+                  } finally {
+                    setIsResuming(false);
+                  }
+                }}
+                disabled={isResuming}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isResuming ? (
+                  <span className="flex items-center justify-center">
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Wird bearbeitet...
+                  </span>
+                ) : (
+                  'Jetzt fortsetzen'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Kündigungs-Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                Abonnement kündigen?
+              </h3>
+              <div className="mt-4 space-y-3">
+                <p className="text-sm text-gray-500">
+                  Möchten Sie Ihr Pro-Abonnement wirklich kündigen?
+                </p>
+                
+                {user?.subscription?.expiresAt && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Ihr Zugriff läuft ab am:</strong>
+                      <br />
+                      <span className="text-base font-semibold">
+                        {formatDate(user.subscription.expiresAt)}
+                      </span>
+                    </p>
+                  </div>
+                )}
+                
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Was passiert nach der Kündigung:</strong>
+                  </p>
+                  <ul className="mt-2 text-sm text-yellow-700 list-disc list-inside space-y-1">
+                    <li>Sie können bis zum Ablaufdatum alle Pro-Features nutzen</li>
+                    <li>Danach wechseln Sie automatisch zum kostenlosen Plan</li>
+                    <li>Sie können jederzeit wieder upgraden</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={async () => {
+                  setIsCancelling(true)
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (!session?.access_token) {
+                      alert('Keine gültige Session gefunden');
+                      return;
+                    }
+
+                    const response = await fetch('/api/stripe/cancel-subscription', {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                      },
+                    });
+
+                    if (response.ok) {
+                      setShowCancelModal(false);
+                      window.location.reload();
+                    } else {
+                      const error = await response.json();
+                      setShowCancelModal(false);
+                      alert(error.error || 'Fehler beim Kündigen des Abonnements');
+                    }
+                  } catch (error) {
+                    console.error('Cancel error:', error);
+                    alert('Fehler beim Kündigen des Abonnements');
+                  } finally {
+                    setIsCancelling(false);
+                  }
+                }}
+                disabled={isCancelling}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCancelling ? (
+                  <span className="flex items-center justify-center">
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Wird bearbeitet...
+                  </span>
+                ) : (
+                  'Jetzt kündigen'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
   )
 }

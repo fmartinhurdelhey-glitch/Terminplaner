@@ -130,6 +130,14 @@ export default function Login({ isSignup = false }: LoginProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
               />
+              {!isSignup && (
+                <p className="text-sm text-muted-foreground">
+                  <Link href="/passwort-vergessen" className="text-primary hover:underline">
+                    Passwort
+                  </Link>
+                  {' '}vergessen?
+                </p>
+              )}
             </div>
             {isSignup && (
               <div className="space-y-3">

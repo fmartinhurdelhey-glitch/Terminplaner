@@ -15,6 +15,7 @@ type User = {
     plan: string
     status: 'active' | 'inactive' | 'cancelled'
     expiresAt?: string
+    cancelAtPeriodEnd?: boolean
   }
 }
 
@@ -75,22 +76,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Separate Funktion zum Laden der Subscription-Daten (non-blocking)
   const loadSubscriptionData = async (userId: string) => {
+    console.log('Loading subscription data for user:', userId);
     try {
-      const { data: subscription, error } = await supabase
+      const { data: subscriptions, error } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1);
+      
+      const subscription = subscriptions?.[0] || null;
 
-      if (!error && subscription) {
-        setUser(prev => prev ? {
-          ...prev,
-          subscription: {
-            plan: subscription.plan || 'Free',
-            status: subscription.status || 'active',
-            expiresAt: subscription.current_period_end,
-          }
-        } : null);
+      console.log('Subscription query result:', { subscription, error });
+
+      if (error) {
+        console.error('Subscription query error:', error);
+        return;
+      }
+
+      if (subscription) {
+        console.log('Found subscription, updating user state:', subscription);
+        setUser(prev => {
+          const updated = prev ? {
+            ...prev,
+            subscription: {
+              plan: subscription.plan || 'Free',
+              status: subscription.status || 'active',
+              expiresAt: subscription.current_period_end,
+              cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+            }
+          } : null;
+          console.log('Updated user state:', updated);
+          return updated;
+        });
+      } else {
+        console.log('No subscription found for user');
       }
     } catch (error) {
       console.error('Error loading subscription:', error);

@@ -207,7 +207,7 @@ export default function Pricing() {
 
                         <CardFooter className="mt-auto">
                             <Button
-                                onClick={() => handleCheckout('price_1SpCEHLF1PJBnUS7CPNPranN')}
+                                onClick={() => handleCheckout('price_1SpK0pLF1PJBnUS7XfoiBE0M')}
                                 disabled={loading}
                                 variant="outline"
                                 className="w-full">

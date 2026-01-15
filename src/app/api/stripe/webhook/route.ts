@@ -40,16 +40,55 @@ export async function POST(req: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         
-        await supabase.from('subscriptions').insert({
+        // Hole Session mit Line Items
+        const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+          expand: ['line_items', 'line_items.data.price']
+        });
+        
+        // Hole komplette Subscription-Daten wenn es eine Subscription ist
+        let currentPeriodEnd = null;
+        let currentPeriodStart = null;
+        let planName = 'Lifetime';
+        let stripePriceId = fullSession.line_items?.data[0]?.price?.id || null;
+        
+        if (session.mode === 'subscription' && session.subscription) {
+          planName = 'Pro';
+          
+          // Period-Daten selbst berechnen (monatliches Abo = +1 Monat)
+          const now = new Date();
+          const oneMonthLater = new Date(now);
+          oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+          
+          currentPeriodStart = now.toISOString();
+          currentPeriodEnd = oneMonthLater.toISOString();
+          
+          console.log('Calculated period:', {
+            current_period_start: currentPeriodStart,
+            current_period_end: currentPeriodEnd
+          });
+        }
+        
+        await supabase.from('subscriptions').upsert({
           user_id: session.metadata?.userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
+          stripe_price_id: stripePriceId,
           status: 'active',
-          plan: 'pro',
+          plan: planName,
+          current_period_start: currentPeriodStart,
+          current_period_end: currentPeriodEnd,
+          cancel_at_period_end: false,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
         
-        console.log('Subscription created for user:', session.metadata?.userId);
+        console.log('Subscription created/updated via webhook:', {
+          userId: session.metadata?.userId,
+          plan: planName,
+          stripePriceId,
+          current_period_start: currentPeriodStart,
+          current_period_end: currentPeriodEnd
+        });
         break;
       }
 
@@ -60,11 +99,18 @@ export async function POST(req: NextRequest) {
           .from('subscriptions')
           .update({ 
             status: subscription.status,
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            current_period_end: (subscription as any).current_period_end 
+              ? new Date((subscription as any).current_period_end * 1000).toISOString()
+              : null,
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', subscription.id);
         
-        console.log('Subscription updated:', subscription.id);
+        console.log('Subscription updated:', subscription.id, {
+          status: subscription.status,
+          cancel_at_period_end: subscription.cancel_at_period_end
+        });
         break;
       }
 
