@@ -207,7 +207,7 @@ export default function Pricing() {
 
                         <CardFooter className="mt-auto">
                             <Button
-                                onClick={() => handleCheckout('price_1SpK0pLF1PJBnUS7XfoiBE0M')}
+                                onClick={() => handleCheckout('price_1SpCEHLF1PJBnUS7CPNPranN')}
                                 disabled={loading}
                                 variant="outline"
                                 className="w-full">
@@ -242,7 +242,7 @@ export default function Pricing() {
 
                         <CardFooter className="mt-auto">
                             <Button
-                                onClick={() => handleCheckout('price_1SpHpMLF1PJBnUS7CrK27Plp')}
+                                onClick={() => handleCheckout('price_1SpH9OLF1PJBnUS7nMwPA4HZ')}
                                 disabled={loading}
                                 className="w-full bg-black text-white hover:bg-gray-800">
                                 {loading ? 'Lädt...' : 'Starten'}
