@@ -78,33 +78,12 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Erstelle Update-Daten mit current_period_end direkt von Stripe
     const updateData: any = {
       cancel_at_period_end: false,
+      current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
       updated_at: new Date().toISOString(),
     };
-
-    // Setze current_period_end
-    if (stripeSubscription.current_period_end) {
-      // Wenn Stripe es liefert, verwende es
-      updateData.current_period_end = new Date(stripeSubscription.current_period_end * 1000).toISOString();
-    } else if (stripeSubscription.current_period_start) {
-      // Falls nicht vorhanden, berechne +1 Monat ab current_period_start
-      const periodStart = new Date(stripeSubscription.current_period_start * 1000);
-      const periodEnd = new Date(periodStart);
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-      updateData.current_period_end = periodEnd.toISOString();
-      console.log('Calculated current_period_end from start date:', {
-        start: periodStart.toISOString(),
-        calculated_end: periodEnd.toISOString()
-      });
-    } else {
-      // Fallback: Aktuelles Datum + 1 Monat
-      const now = new Date();
-      const periodEnd = new Date(now);
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-      updateData.current_period_end = periodEnd.toISOString();
-      console.log('Calculated current_period_end from now:', periodEnd.toISOString());
-    }
 
     console.log('Updating Supabase with:', updateData);
 
