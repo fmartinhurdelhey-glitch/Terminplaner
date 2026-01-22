@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -132,7 +132,46 @@ function ContactForm({ onClose }: { onClose: () => void }) {
 export default function Pricing() {
   const [showContactForm, setShowContactForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [subscriptionType, setSubscriptionType] = useState<string | null>(null);
+  const [checkingSubscription, setCheckingSubscription] = useState(true);
   const { user } = useAuth();
+
+  // Prüfe ob User bereits ein aktives Abo hat
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (!user) {
+        setHasActiveSubscription(false);
+        setCheckingSubscription(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .select('status, cancel_at_period_end, stripe_price_id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!error && data) {
+          const isActive = data.status === 'active' && !data.cancel_at_period_end;
+          const isLifetime = data.status === 'lifetime';
+          setHasActiveSubscription(isActive || isLifetime);
+          
+          // Speichere welchen Plan der User hat
+          if (isActive || isLifetime) {
+            setSubscriptionType(data.stripe_price_id);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking subscription:', err);
+      } finally {
+        setCheckingSubscription(false);
+      }
+    };
+
+    checkSubscription();
+  }, [user]);
 
   const handleCheckout = async (priceId: string) => {
     if (!user) {
@@ -140,6 +179,12 @@ export default function Pricing() {
       setTimeout(() => {
         window.location.href = '/signup';
       }, 1500);
+      return;
+    }
+
+    // Verhindere Doppelkauf wenn bereits aktives Abo
+    if (hasActiveSubscription) {
+      toast.error('Du hast bereits ein aktives Abonnement');
       return;
     }
 
@@ -208,10 +253,12 @@ export default function Pricing() {
                         <CardFooter className="mt-auto">
                             <Button
                                 onClick={() => handleCheckout('price_1SpK0pLF1PJBnUS7XfoiBE0M')}
-                                disabled={loading}
+                                disabled={loading || checkingSubscription || (hasActiveSubscription && subscriptionType === 'price_1SpK0pLF1PJBnUS7XfoiBE0M')}
                                 variant="outline"
                                 className="w-full">
-                                {loading ? 'Lädt...' : 'Starten'}
+                                {checkingSubscription ? 'Laden...' : 
+                                 hasActiveSubscription && subscriptionType === 'price_1SpK0pLF1PJBnUS7XfoiBE0M' ? 'Bereits aktiv' : 
+                                 loading ? 'Lädt...' : 'Starten'}
                             </Button>
                         </CardFooter>
                     </Card>
@@ -243,9 +290,11 @@ export default function Pricing() {
                         <CardFooter className="mt-auto">
                             <Button
                                 onClick={() => handleCheckout('price_1SpHpMLF1PJBnUS7CrK27Plp')}
-                                disabled={loading}
+                                disabled={loading || checkingSubscription || (hasActiveSubscription && subscriptionType === 'price_1SpHpMLF1PJBnUS7CrK27Plp')}
                                 className="w-full bg-black text-white hover:bg-gray-800">
-                                {loading ? 'Lädt...' : 'Starten'}
+                                {checkingSubscription ? 'Laden...' : 
+                                 hasActiveSubscription && subscriptionType === 'price_1SpHpMLF1PJBnUS7CrK27Plp' ? 'Bereits aktiv' : 
+                                 loading ? 'Lädt...' : 'Starten'}
                             </Button>
                         </CardFooter>
                     </Card>
