@@ -149,7 +149,10 @@ export default function ProfilePage() {
                     </span>
                     {isProSubscription && subscriptionData?.current_period_end && (
                       <span className="text-sm text-gray-500">
-                        Läuft ab: {formatDate(subscriptionData.current_period_end)}
+                        {subscriptionData.cancel_at_period_end 
+                          ? `Läuft ab: ${formatDate(subscriptionData.current_period_end)}`
+                          : `Erneuert sich am: ${formatDate(subscriptionData.current_period_end)}`
+                        }
                       </span>
                     )}
                   </div>
