@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, X, Download, User, Apple, Monitor, Laptop } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { Logo } from '@/components/logo'
+import { supabase } from '@/lib/supabase'
 
 const menuItems = [
     { name: 'Home', href: '/' },
@@ -25,6 +26,8 @@ export const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false)
     const [isScrolled, setIsScrolled] = React.useState(false)
     const [downloadOpen, setDownloadOpen] = React.useState(false)
+    const [hasSubscription, setHasSubscription] = React.useState(false)
+    const [checkingSubscription, setCheckingSubscription] = React.useState(true)
     const { user, loading } = useAuth()
     const router = useRouter()
     
@@ -34,6 +37,41 @@ export const HeroHeader = () => {
         setMounted(true)
     }, [])
 
+    // Prüfe Subscription-Status
+    React.useEffect(() => {
+        const checkSubscription = async () => {
+            if (!user) {
+                setHasSubscription(false)
+                setCheckingSubscription(false)
+                return
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('subscriptions')
+                    .select('status, cancel_at_period_end')
+                    .eq('user_id', user.id)
+                    .single()
+
+                if (!error && data) {
+                    // Hat aktives Abo wenn status 'active' und nicht gekündigt, oder 'lifetime'
+                    const isActive = data.status === 'active' && !data.cancel_at_period_end
+                    const isLifetime = data.status === 'lifetime'
+                    setHasSubscription(isActive || isLifetime)
+                } else {
+                    setHasSubscription(false)
+                }
+            } catch (err) {
+                console.error('Error checking subscription:', err)
+                setHasSubscription(false)
+            } finally {
+                setCheckingSubscription(false)
+            }
+        }
+
+        checkSubscription()
+    }, [user])
+
     React.useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50)
@@ -42,9 +80,14 @@ export const HeroHeader = () => {
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
     
-    const handleDownload = (e: React.MouseEvent) => {
-        e.preventDefault()
-        router.push('/download')
+    const handleDownloadClick = () => {
+        if (!hasSubscription) {
+            // Kein aktives Abo -> Redirect zu Pricing
+            router.push('/pricing')
+        } else {
+            // Aktives Abo -> Toggle Dropdown
+            setDownloadOpen(!downloadOpen)
+        }
     }
 
     return (
@@ -104,10 +147,11 @@ export const HeroHeader = () => {
                                                 variant="outline" 
                                                 size="sm" 
                                                 className="gap-2"
-                                                onClick={() => setDownloadOpen(!downloadOpen)}
+                                                onClick={handleDownloadClick}
+                                                disabled={checkingSubscription}
                                             >
                                                 <Download className="h-4 w-4" />
-                                                Download
+                                                {checkingSubscription ? 'Laden...' : 'Download'}
                                             </Button>
                                             {downloadOpen && (
                                                 <>
