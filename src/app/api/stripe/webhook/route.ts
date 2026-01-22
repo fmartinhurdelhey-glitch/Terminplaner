@@ -48,23 +48,26 @@ export async function POST(req: NextRequest) {
         // Hole komplette Subscription-Daten wenn es eine Subscription ist
         let currentPeriodEnd = null;
         let currentPeriodStart = null;
+        let trialEnd = null;
         let planName = 'Lifetime';
         let stripePriceId = fullSession.line_items?.data[0]?.price?.id || null;
         
         if (session.mode === 'subscription' && session.subscription) {
           planName = 'Pro';
           
-          // Period-Daten selbst berechnen (monatliches Abo = +1 Monat)
-          const now = new Date();
-          const oneMonthLater = new Date(now);
-          oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+          // Hole echte Subscription-Daten von Stripe (inkl. Trial-Info)
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as any;
           
-          currentPeriodStart = now.toISOString();
-          currentPeriodEnd = oneMonthLater.toISOString();
+          // Verwende echte Stripe-Daten
+          currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+          currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+          trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null;
           
-          console.log('Calculated period:', {
+          console.log('Stripe subscription data:', {
             current_period_start: currentPeriodStart,
-            current_period_end: currentPeriodEnd
+            current_period_end: currentPeriodEnd,
+            trial_end: trialEnd,
+            status: subscription.status
           });
         }
         
@@ -77,6 +80,7 @@ export async function POST(req: NextRequest) {
           plan: planName,
           current_period_start: currentPeriodStart,
           current_period_end: currentPeriodEnd,
+          trial_end: trialEnd,
           cancel_at_period_end: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

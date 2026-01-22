@@ -63,6 +63,12 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         paymentType: isSubscription ? 'subscription' : 'one-time',
       },
+      // 7-Tage kostenlose Testversion für Subscriptions
+      ...(isSubscription && {
+        subscription_data: {
+          trial_period_days: 7,
+        },
+      }),
     });
 
     return NextResponse.json({ sessionId: session.url });

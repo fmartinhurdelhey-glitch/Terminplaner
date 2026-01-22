@@ -147,11 +147,19 @@ export default function ProfilePage() {
                     }`}>
                       {isLifetime ? 'Lifetime' : isProSubscription ? 'Pro' : 'Kostenlos'}
                     </span>
+                    {/* Trial-Badge wenn in Testphase */}
+                    {isProSubscription && subscriptionData?.trial_end && new Date(subscriptionData.trial_end) > new Date() && (
+                      <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        Testphase
+                      </span>
+                    )}
                     {isProSubscription && subscriptionData?.current_period_end && (
                       <span className="text-sm text-gray-500">
-                        {subscriptionData.cancel_at_period_end 
-                          ? `Läuft ab: ${formatDate(subscriptionData.current_period_end)}`
-                          : `Erneuert sich am: ${formatDate(subscriptionData.current_period_end)}`
+                        {subscriptionData.trial_end && new Date(subscriptionData.trial_end) > new Date()
+                          ? `Testphase endet: ${formatDate(subscriptionData.trial_end)}`
+                          : subscriptionData.cancel_at_period_end 
+                            ? `Läuft ab: ${formatDate(subscriptionData.current_period_end)}`
+                            : `Erneuert sich am: ${formatDate(subscriptionData.current_period_end)}`
                         }
                       </span>
                     )}
