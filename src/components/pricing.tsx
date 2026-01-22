@@ -234,9 +234,6 @@ export default function Pricing() {
                             <CardTitle className="font-medium">Pro</CardTitle>
                             <span className="my-3 block text-2xl font-semibold">15€ / mo</span>
                             <CardDescription className="text-sm">Pro Nutzer</CardDescription>
-                            <span className="mt-2 inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-                                7 Tage kostenlos testen
-                            </span>
                         </CardHeader>
 
                         <CardContent className="space-y-4">
