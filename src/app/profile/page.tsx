@@ -17,12 +17,42 @@ export default function ProfilePage() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [showResumeModal, setShowResumeModal] = useState(false)
   const [isResuming, setIsResuming] = useState(false)
+  const [subscriptionData, setSubscriptionData] = useState<any>(null)
+  const [loadingSubscription, setLoadingSubscription] = useState(true)
   
-  // Abonnementstatus überprüfen
-  const isPaidUser = user?.subscription?.status === 'active' && 
-    (user?.subscription?.plan?.toLowerCase() === 'pro' || user?.subscription?.plan?.toLowerCase() === 'lifetime')
-  const isProSubscription = user?.subscription?.plan?.toLowerCase() === 'pro'
-  const isLifetime = user?.subscription?.plan?.toLowerCase() === 'lifetime'
+  // Lade aktuelle Subscription-Daten direkt aus Supabase
+  useEffect(() => {
+    const loadSubscription = async () => {
+      if (!user) {
+        setLoadingSubscription(false)
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!error && data) {
+          setSubscriptionData(data)
+        }
+      } catch (err) {
+        console.error('Error loading subscription:', err)
+      } finally {
+        setLoadingSubscription(false)
+      }
+    }
+
+    loadSubscription()
+  }, [user])
+
+  // Abonnementstatus überprüfen (basierend auf frischen Daten aus Supabase)
+  const isPaidUser = subscriptionData?.status === 'active' && 
+    (subscriptionData?.plan?.toLowerCase() === 'pro' || subscriptionData?.plan?.toLowerCase() === 'lifetime')
+  const isProSubscription = subscriptionData?.plan?.toLowerCase() === 'pro'
+  const isLifetime = subscriptionData?.plan?.toLowerCase() === 'lifetime'
   const isFreeUser = !isPaidUser
   
   // Formatierung des Ablaufdatums (falls vorhanden)
@@ -111,9 +141,9 @@ export default function ProfilePage() {
                     }`}>
                       {isLifetime ? 'Lifetime' : isProSubscription ? 'Pro' : 'Kostenlos'}
                     </span>
-                    {isProSubscription && user.subscription?.expiresAt && (
+                    {isProSubscription && subscriptionData?.current_period_end && (
                       <span className="text-sm text-gray-500">
-                        Läuft ab: {formatDate(user.subscription.expiresAt)}
+                        Läuft ab: {formatDate(subscriptionData.current_period_end)}
                       </span>
                     )}
                   </div>
@@ -124,7 +154,7 @@ export default function ProfilePage() {
                       <div className="space-y-4">
                         {/* Pro-Subscription Buttons */}
                         {isProSubscription && (
-                          user.subscription?.cancelAtPeriodEnd ? (
+                          subscriptionData?.cancel_at_period_end ? (
                             // Abo fortsetzen Button
                             <button
                               onClick={() => setShowResumeModal(true)}
