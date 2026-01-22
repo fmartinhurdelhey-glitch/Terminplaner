@@ -56,9 +56,15 @@ export default function ProfilePage() {
   const isFreeUser = !isPaidUser
   
   // Formatierung des Ablaufdatums (falls vorhanden)
+  // Nimmt nur das Datum (ohne Uhrzeit/Zeitzone) um Verschiebungen zu vermeiden
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('de-DE', {
+    // Extrahiere nur YYYY-MM-DD aus dem Timestamp um Zeitzonen-Probleme zu vermeiden
+    const datePart = dateString.split('T')[0] || dateString.split(' ')[0]
+    const [year, month, day] = datePart.split('-').map(Number)
+    // Erstelle Datum mit expliziten Werten (Monate sind 0-basiert)
+    const date = new Date(year, month - 1, day)
+    return date.toLocaleDateString('de-DE', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
