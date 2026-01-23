@@ -153,13 +153,20 @@ export default function ProfilePage() {
                         Testphase
                       </span>
                     )}
-                    {isProSubscription && subscriptionData?.current_period_end && (
+                    {isProSubscription && (
                       <span className="text-sm text-gray-500">
-                        {subscriptionData.trial_end && new Date(subscriptionData.trial_end) > new Date()
-                          ? `Testphase endet: ${formatDate(subscriptionData.trial_end)}`
-                          : subscriptionData.cancel_at_period_end 
-                            ? `Läuft ab: ${formatDate(subscriptionData.current_period_end)}`
-                            : `Erneuert sich am: ${formatDate(subscriptionData.current_period_end)}`
+                        {subscriptionData?.trial_end && new Date(subscriptionData.trial_end) > new Date()
+                          ? (() => {
+                              const trialEndDate = new Date(subscriptionData.trial_end);
+                              const now = new Date();
+                              const daysLeft = Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                              return `Testphase endet in ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tagen'} (${formatDate(subscriptionData.trial_end)})`;
+                            })()
+                          : subscriptionData?.cancel_at_period_end 
+                            ? `Läuft ab: ${formatDate(subscriptionData?.current_period_end)}`
+                            : subscriptionData?.current_period_end 
+                              ? `Erneuert sich am: ${formatDate(subscriptionData.current_period_end)}`
+                              : null
                         }
                       </span>
                     )}

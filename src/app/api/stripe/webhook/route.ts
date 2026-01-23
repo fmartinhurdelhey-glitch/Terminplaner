@@ -58,10 +58,28 @@ export async function POST(req: NextRequest) {
           // Hole echte Subscription-Daten von Stripe (inkl. Trial-Info)
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as any;
           
-          // Verwende echte Stripe-Daten
-          currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
-          currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
-          trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null;
+          // Trial-Logik: 
+          // - trial_end = Kaufdatum + 7 Tage (Ende der Testphase)
+          // - current_period_start = trial_end (Start des bezahlten Abos)
+          // - current_period_end = current_period_start + 1 Monat
+          
+          if (subscription.trial_end) {
+            // Es gibt eine Trial-Periode
+            trialEnd = new Date(subscription.trial_end * 1000).toISOString();
+            
+            // current_period_start = Ende des Trials (Start des bezahlten Abos)
+            const trialEndDate = new Date(subscription.trial_end * 1000);
+            currentPeriodStart = trialEndDate.toISOString();
+            
+            // current_period_end = Trial-Ende + 1 Monat
+            const periodEndDate = new Date(trialEndDate);
+            periodEndDate.setMonth(periodEndDate.getMonth() + 1);
+            currentPeriodEnd = periodEndDate.toISOString();
+          } else {
+            // Kein Trial - normale Daten von Stripe
+            currentPeriodStart = new Date(subscription.current_period_start * 1000).toISOString();
+            currentPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+          }
           
           console.log('Stripe subscription data:', {
             current_period_start: currentPeriodStart,
