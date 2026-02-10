@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       line_items: session.line_items?.data[0]?.price?.id
     });
 
-    if (!session || session.payment_status !== 'paid') {
+    if (!session || (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required')) {
       console.error('Payment not completed:', session);
       return NextResponse.json(
         { error: 'Zahlung nicht abgeschlossen' },
@@ -68,18 +68,34 @@ export async function POST(req: NextRequest) {
     
     let planName = 'Free';
     let subscriptionId = null;
+    let currentPeriodStart = null;
     let currentPeriodEnd = null;
+    let trialEnd = null;
 
     if (isSubscription && session.subscription) {
-      const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+      const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as any;
       planName = 'Pro';
       subscriptionId = subscription.id;
-      currentPeriodEnd = (subscription as any).current_period_end 
-        ? new Date((subscription as any).current_period_end * 1000).toISOString()
+      currentPeriodStart = subscription.current_period_start
+        ? new Date(subscription.current_period_start * 1000).toISOString()
+        : new Date().toISOString();
+      currentPeriodEnd = subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
         : null;
+      trialEnd = subscription.trial_end
+        ? new Date(subscription.trial_end * 1000).toISOString()
+        : null;
+      
+      console.log('Stripe subscription details:', {
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+        trial_end: trialEnd,
+        status: subscription.status,
+      });
     } else {
       // Einmalzahlung
       planName = 'Lifetime';
+      currentPeriodStart = new Date().toISOString();
     }
 
     // Verwende Service Role Key für Datenbankoperationen
@@ -96,8 +112,9 @@ export async function POST(req: NextRequest) {
       stripe_price_id: session.line_items?.data[0]?.price?.id,
       plan: planName,
       status: 'active',
-      current_period_start: new Date().toISOString(),
+      current_period_start: currentPeriodStart,
       current_period_end: currentPeriodEnd,
+      trial_end: trialEnd,
       cancel_at_period_end: false,
       updated_at: new Date().toISOString(),
     };
