@@ -61,7 +61,20 @@ export default function Login({ isSignup = false }: LoginProps) {
         router.push('/')
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten')
+      const message = error instanceof Error ? error.message : ''
+      if (message.toLowerCase().includes('invalid login credentials') || message.toLowerCase().includes('invalid_credentials')) {
+        toast.error('E-Mail oder Passwort ist falsch. Falls Sie noch kein Konto haben, registrieren Sie sich bitte.', {
+          action: {
+            label: 'Jetzt registrieren',
+            onClick: () => router.push('/signup'),
+          },
+          duration: 8000,
+        })
+      } else if (message.toLowerCase().includes('email not confirmed')) {
+        toast.error('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.')
+      } else {
+        toast.error(message || 'Ein Fehler ist aufgetreten')
+      }
     } finally {
       setIsLoading(false)
     }
