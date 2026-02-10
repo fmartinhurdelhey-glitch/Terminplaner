@@ -375,17 +375,23 @@ export default function ProfilePage() {
                   Möchten Sie Ihr Pro-Abonnement wirklich kündigen?
                 </p>
                 
-                {user?.subscription?.expiresAt && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm text-blue-800">
-                      <strong>Ihr Zugriff läuft ab am:</strong>
-                      <br />
-                      <span className="text-base font-semibold">
-                        {formatDate(user.subscription.expiresAt)}
-                      </span>
-                    </p>
-                  </div>
-                )}
+                {(() => {
+                  const isInTrial = subscriptionData?.trial_end && new Date(subscriptionData.trial_end) > new Date()
+                  const displayDate = isInTrial
+                    ? subscriptionData?.trial_end
+                    : subscriptionData?.current_period_end || user?.subscription?.expiresAt
+                  return displayDate ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-800">
+                        <strong>Ihr Zugriff läuft ab am:</strong>
+                        <br />
+                        <span className="text-base font-semibold">
+                          {formatDate(displayDate)}
+                        </span>
+                      </p>
+                    </div>
+                  ) : null
+                })()}
                 
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                   <p className="text-sm text-yellow-800">

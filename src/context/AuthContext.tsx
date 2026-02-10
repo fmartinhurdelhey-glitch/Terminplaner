@@ -15,6 +15,7 @@ type User = {
     plan: string
     status: 'active' | 'inactive' | 'cancelled'
     expiresAt?: string
+    trialEnd?: string
     cancelAtPeriodEnd?: boolean
   }
 }
@@ -103,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               plan: subscription.plan || 'Free',
               status: subscription.status || 'active',
               expiresAt: subscription.current_period_end,
+              trialEnd: subscription.trial_end || undefined,
               cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
             }
           } : null;
