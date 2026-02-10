@@ -117,14 +117,15 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         
+        // Nur Status und cancel_at_period_end aktualisieren.
+        // current_period_start und current_period_end werden NICHT überschrieben,
+        // da diese nur beim Erstellen (checkout.session.completed) gesetzt werden
+        // und sich beim Cancel/Resume nicht ändern sollen.
         await supabase
           .from('subscriptions')
           .update({ 
             status: subscription.status,
             cancel_at_period_end: subscription.cancel_at_period_end,
-            current_period_end: (subscription as any).current_period_end 
-              ? new Date((subscription as any).current_period_end * 1000).toISOString()
-              : null,
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', subscription.id);
