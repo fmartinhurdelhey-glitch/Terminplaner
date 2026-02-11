@@ -306,7 +306,9 @@ const getInitialSession = async () => {
               updated_at: new Date().toISOString(),
             });
 
-          if (profileError) throw profileError;
+          if (profileError) {
+            console.warn('Profile upsert failed (non-critical):', profileError);
+          }
         }
 
         const mappedUser = mapSupabaseUser(data?.user || null);
@@ -321,7 +323,7 @@ const getInitialSession = async () => {
           data: {
             user: mappedUser as User,
             session: data?.session || null,
-            emailConfirmationSent: !!data?.user?.identities?.some(i => i.identity_data?.email === email)
+            emailConfirmationSent: !!data?.user && !data?.session
           }
         };
       } catch (err) {

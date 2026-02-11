@@ -51,8 +51,12 @@ export default function Login({ isSignup = false }: LoginProps) {
         if (error) throw error
         
         if (data?.emailConfirmationSent) {
-          toast.success('Registrierung erfolgreich! Bitte bestätigen Sie Ihre E-Mail.')
-          router.push('/login')
+          toast.success('Registrierung erfolgreich! Bitte bestätigen Sie Ihre E-Mail-Adresse über den Link, den wir Ihnen zugeschickt haben.', {
+            duration: 10000,
+          })
+          router.push('/login?registered=true')
+        } else if (data?.session) {
+          router.push('/')
         }
       } else {
         const { error } = await signIn(email, password)
