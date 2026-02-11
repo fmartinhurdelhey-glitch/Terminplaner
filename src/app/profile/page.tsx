@@ -49,7 +49,8 @@ export default function ProfilePage() {
   }, [user])
 
   // Abonnementstatus überprüfen (basierend auf frischen Daten aus Supabase)
-  const isPaidUser = subscriptionData?.status === 'active' && 
+  const isInActiveTrial = subscriptionData?.trial_end && new Date(subscriptionData.trial_end) > new Date()
+  const isPaidUser = (subscriptionData?.status === 'active' || isInActiveTrial) && 
     (subscriptionData?.plan?.toLowerCase() === 'pro' || subscriptionData?.plan?.toLowerCase() === 'lifetime')
   const isProSubscription = subscriptionData?.plan?.toLowerCase() === 'pro'
   const isLifetime = subscriptionData?.plan?.toLowerCase() === 'lifetime'
@@ -252,11 +253,11 @@ export default function ProfilePage() {
                   </div>
                   {user.subscription?.status && (
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      user.subscription.status === 'active' 
+                      (user.subscription.status === 'active' || isInActiveTrial)
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {user.subscription.status === 'active' ? 'Aktiv' : 'Inaktiv'}
+                      {(user.subscription.status === 'active' || isInActiveTrial) ? 'Aktiv' : 'Inaktiv'}
                     </span>
                   )}
                 </div>
